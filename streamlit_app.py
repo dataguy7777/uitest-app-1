@@ -288,19 +288,32 @@ if 'additional_feedback_expander' not in st.session_state:
     st.session_state['additional_feedback_expander'] = ""
 
 if 'chat_history' not in st.session_state:
-    # Prepopola la cronologia della chat con una domanda e risposta iniziale
+    # Prepopola la cronologia della chat con una domanda e una risposta iniziale migliorata
     st.session_state['chat_history'] = [
         ("user", "Puoi fornirmi la granularità delle tabelle per il bilancio?"),
         ("assistant", """
-**Ecco la granularità delle tabelle relative al bilancio:**
+---
+**🔍 Granularità delle Tabelle del Bilancio**
 
-| Tabella                 | Granularità                                     |
-|-------------------------|-------------------------------------------------|
-| FIN_DATA_Q1_REVENUE     | Dipartimento e mese                             |
-| FIN_DATA_Q2_EXPENSES    | Dipartimento, categoria di spesa e trimestre    |
-| FIN_DATA_Q3_PROFIT      | Dipartimento, prodotto e anno                   |
-| FIN_DATA_Q4_ASSETS      | Categoria di asset e mese                       |
-| FIN_DATA_Q5_LIABILITIES | Tipo di passività e anno                        |
+| **Tabella**               | **Granularità**                                      |
+|---------------------------|------------------------------------------------------|
+| **FIN_DATA_Q1_REVENUE**   | - Dipartimento<br>- Mese                             |
+| **FIN_DATA_Q2_EXPENSES**  | - Dipartimento<br>- Categoria di spesa<br>- Trimestre |
+| **FIN_DATA_Q3_PROFIT**    | - Dipartimento<br>- Prodotto<br>- Anno                |
+| **FIN_DATA_Q4_ASSETS**    | - Categoria di asset<br>- Mese                        |
+| **FIN_DATA_Q5_LIABILITIES** | - Tipo di passività<br>- Anno                     |
+
+---
+**📌 Descrizione delle Tabelle:**
+
+- **FIN_DATA_Q1_REVENUE**: Contiene i dati di fatturato suddivisi per dipartimento e mese.
+- **FIN_DATA_Q2_EXPENSES**: Raccoglie le spese dettagliate per dipartimento, categoria di spesa e trimestre.
+- **FIN_DATA_Q3_PROFIT**: Mostra i profitti analizzati per dipartimento, prodotto e anno.
+- **FIN_DATA_Q4_ASSETS**: Elenca gli asset categorizzati per tipo di asset e mese.
+- **FIN_DATA_Q5_LIABILITIES**: Include le passività suddivise per tipo e anno.
+
+---
+Questa struttura rende le informazioni più leggibili e organizzate, facilitando la consultazione all'interno del chatbot della tua app Streamlit. Se desideri ulteriori personalizzazioni o aggiungere funzionalità interattive, fammi sapere!
         """)
     ]
 
