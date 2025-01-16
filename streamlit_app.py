@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import urllib.parse
 
 # --------------------- Configurazione della Pagina ---------------------
 st.set_page_config(
@@ -215,8 +216,32 @@ def inject_css():
         background-color: var(--background-color);
         padding: 10px 20px;
         box-shadow: 0 -2px 5px var(--box-shadow);
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
+    .input-bar input[type="text"] {
+        width: 80%;
+        padding: 10px;
+        border: 1px solid var(--light-gray);
+        border-radius: 5px;
+        margin-right: 10px;
+    }
+
+    .input-bar button {
+        background-color: var(--secondary-color);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .input-bar button:hover {
+        background-color: var(--primary-color);
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -237,13 +262,13 @@ if 'chat_history' not in st.session_state:
         ("assistant", """
 **Ecco la granularità delle tabelle relative al bilancio:**
 
-| Tabella                | Granularità                                    |
-|------------------------|------------------------------------------------|
-| FIN_DATA_Q1_REVENUE    | Dipartimento e mese                            |
-| FIN_DATA_Q2_EXPENSES   | Dipartimento, categoria di spesa e trimestre    |
-| FIN_DATA_Q3_PROFIT     | Dipartimento, prodotto e anno                  |
-| FIN_DATA_Q4_ASSETS     | Categoria di asset e mese                      |
-| FIN_DATA_Q5_LIABILITIES | Tipo di passività e anno                      |
+| Tabella                 | Granularità                                     |
+|-------------------------|-------------------------------------------------|
+| FIN_DATA_Q1_REVENUE     | Dipartimento e mese                             |
+| FIN_DATA_Q2_EXPENSES    | Dipartimento, categoria di spesa e trimestre    |
+| FIN_DATA_Q3_PROFIT      | Dipartimento, prodotto e anno                   |
+| FIN_DATA_Q4_ASSETS      | Categoria di asset e mese                       |
+| FIN_DATA_Q5_LIABILITIES | Tipo di passività e anno                        |
         """)
     ]
 
@@ -362,7 +387,7 @@ def generate_response(user_input):
 | Tabella                 | Granularità                                     |
 |-------------------------|-------------------------------------------------|
 | FIN_DATA_Q1_REVENUE     | Dipartimento e mese                             |
-| FIN_DATA_Q2_EXPENSES    | Dipartimento, categoria di spesa e trimestre     |
+| FIN_DATA_Q2_EXPENSES    | Dipartimento, categoria di spesa e trimestre    |
 | FIN_DATA_Q3_PROFIT      | Dipartimento, prodotto e anno                   |
 | FIN_DATA_Q4_ASSETS      | Categoria di asset e mese                       |
 | FIN_DATA_Q5_LIABILITIES | Tipo di passività e anno                        |
@@ -386,19 +411,12 @@ display_chat()
 # Utilizza HTML per posizionare l'input bar fissata al fondo
 st.markdown("""
 <div class="input-bar">
-    <form action="" method="POST">
-        <input type="text" id="user_input" name="user_input" placeholder="Scrivi un messaggio..." style="width: 80%; padding: 10px; border-radius: 5px; border: 1px solid var(--light-gray);">
-        <button type="submit" style="background-color: var(--secondary-color); color: white; border: none; border-radius: 5px; padding: 10px 20px; margin-left: 10px;">Invia</button>
-    </form>
+    <input type="text" id="user_input" name="user_input" placeholder="Scrivi un messaggio...">
+    <button onclick="sendMessage()">Invia</button>
 </div>
-""", unsafe_allow_html=True)
 
-# JavaScript per inviare il testo dall'input al server senza ricaricare la pagina
-st.markdown("""
 <script>
-const form = document.querySelector('form');
-form.onsubmit = (e) => {
-    e.preventDefault();
+function sendMessage() {
     const input = document.getElementById('user_input');
     const user_input = input.value;
     if (user_input.trim() !== "") {
@@ -407,14 +425,12 @@ form.onsubmit = (e) => {
         url.searchParams.set('user_input', user_input);
         window.location = url;
     }
-};
+}
 </script>
 """, unsafe_allow_html=True)
 
 # Recupera l'input dall'URL se presente
-import urllib.parse
-
-query_params = st.experimental_get_query_params()
+query_params = st.query_params
 if 'user_input' in query_params:
     user_input = query_params['user_input'][0]
     if user_input:
