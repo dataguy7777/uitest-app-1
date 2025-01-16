@@ -214,13 +214,13 @@ if 'chat_history' not in st.session_state:
         ("assistant", """
 **Ecco la granularità delle tabelle relative al bilancio:**
 
-| Tabella               | Granularità                                  |
-|-----------------------|----------------------------------------------|
-| FIN_DATA_Q1_REVENUE   | Dipartimento e mese                          |
-| FIN_DATA_Q2_EXPENSES  | Dipartimento, categoria di spesa e trimestre  |
-| FIN_DATA_Q3_PROFIT    | Dipartimento, prodotto e anno                |
-| FIN_DATA_Q4_ASSETS    | Categoria di asset e mese                    |
-| FIN_DATA_Q5_LIABILITIES | Tipo di passività e anno                  |
+| Tabella                | Granularità                                    |
+|------------------------|------------------------------------------------|
+| FIN_DATA_Q1_REVENUE    | Dipartimento e mese                            |
+| FIN_DATA_Q2_EXPENSES   | Dipartimento, categoria di spesa e trimestre    |
+| FIN_DATA_Q3_PROFIT     | Dipartimento, prodotto e anno                  |
+| FIN_DATA_Q4_ASSETS     | Categoria di asset e mese                      |
+| FIN_DATA_Q5_LIABILITIES | Tipo di passività e anno                      |
         """)
     ]
 
@@ -332,41 +332,21 @@ def generate_response(user_input):
     In un'applicazione reale, questa funzione potrebbe integrare un modello NLP o altre logiche di business.
     Per questo esempio, una risposta predefinita focalizzata sulla granularità delle tabelle è usata.
     """
-    # Risposta focalizzata sulla granularità delle tabelle con embedded dataframe
+    # Risposta focalizzata sulla granularità delle tabelle con embedded markdown table
     response_text = """
 **Ecco la granularità delle tabelle relative al bilancio:**
 
-| Tabella               | Granularità                                  |
-|-----------------------|----------------------------------------------|
-| FIN_DATA_Q1_REVENUE   | Dipartimento e mese                          |
-| FIN_DATA_Q2_EXPENSES  | Dipartimento, categoria di spesa e trimestre  |
-| FIN_DATA_Q3_PROFIT    | Dipartimento, prodotto e anno                |
-| FIN_DATA_Q4_ASSETS    | Categoria di asset e mese                    |
-| FIN_DATA_Q5_LIABILITIES | Tipo di passività e anno                  |
+| Tabella                | Granularità                                    |
+|------------------------|------------------------------------------------|
+| FIN_DATA_Q1_REVENUE    | Dipartimento e mese                            |
+| FIN_DATA_Q2_EXPENSES   | Dipartimento, categoria di spesa e trimestre    |
+| FIN_DATA_Q3_PROFIT     | Dipartimento, prodotto e anno                  |
+| FIN_DATA_Q4_ASSETS     | Categoria di asset e mese                      |
+| FIN_DATA_Q5_LIABILITIES | Tipo di passività e anno                      |
     """
+    return response_text
 
-    # Creazione del dataframe per visualizzazione
-    data = {
-        "Tabella": [
-            "FIN_DATA_Q1_REVENUE",
-            "FIN_DATA_Q2_EXPENSES",
-            "FIN_DATA_Q3_PROFIT",
-            "FIN_DATA_Q4_ASSETS",
-            "FIN_DATA_Q5_LIABILITIES"
-        ],
-        "Granularità": [
-            "Dipartimento e mese",
-            "Dipartimento, categoria di spesa e trimestre",
-            "Dipartimento, prodotto e anno",
-            "Categoria di asset e mese",
-            "Tipo di passività e anno"
-        ]
-    }
-    df = pd.DataFrame(data)
-
-    return response_text, df
-
-# Funzione per visualizzare la cronologia della chat utilizzando st.markdown e st.dataframe
+# Funzione per visualizzare la cronologia della chat utilizzando st.markdown
 def display_chat():
     if st.session_state.chat_history:
         with chat_placeholder.container():
@@ -374,13 +354,7 @@ def display_chat():
                 if sender == "user":
                     st.markdown(f'<div class="user-message">{message}</div>', unsafe_allow_html=True)
                 else:
-                    # Verifica se il messaggio è una tuple con testo e dataframe
-                    if isinstance(message, tuple) and len(message) == 2:
-                        text, df = message
-                        st.markdown(f'<div class="assistant-message">{text}</div>', unsafe_allow_html=True)
-                        st.dataframe(df)
-                    else:
-                        st.markdown(f'<div class="assistant-message">{message}</div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="assistant-message">{message}</div>', unsafe_allow_html=True)
 
 # Visualizza la cronologia della chat
 display_chat()
@@ -391,11 +365,11 @@ user_input = st.text_input("Tu:", key="user_input")
 if user_input:
     # Aggiungi la domanda dell'utente alla cronologia
     st.session_state.chat_history.append(("user", user_input))
-    
+
     # Genera la risposta dell'assistente
     assistant_response = generate_response(user_input)
     st.session_state.chat_history.append(("assistant", assistant_response))
-    
+
     # Aggiorna la visualizzazione della chat
     display_chat()
 
@@ -438,7 +412,7 @@ with st.expander("📚 Fonti", expanded=False):
                 summary = f"Presentazione dettagliata del file {file_name}."
             else:
                 continue  # Salta i tipi di file non supportati
-            
+
             sources.append({
                 "title": file_name,
                 "link": f"https://example.com/files/{file_name}",
