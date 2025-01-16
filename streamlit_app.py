@@ -13,16 +13,18 @@ def inject_css():
     <style>
     /* Definisci la palette di colori */
     :root {
-        --primary-color: #008652; /* Verde Scuro */
-        --secondary-color: #E98A42; /* Arancione */
-        --accent-color: #DEB630; /* Giallo */
-        --background-color: #FFFFFF; /* Bianco */
+        --primary-color: #2C3E50; /* Dark Blue for primary elements */
+        --secondary-color: #3498DB; /* Blue for buttons and highlights */
+        --accent-color: #E74C3C; /* Red for accents and alerts */
+        --background-color: #FFFFFF; /* White background */
+        --text-color: #2C3E50; /* Dark text */
+        --light-gray: #ECF0F1; /* Light gray for borders and backgrounds */
         --box-shadow: rgba(0, 0, 0, 0.1);
     }
 
     /* Stile della Barra Laterale */
     .css-1d391kg {
-        background-color: var(--primary-color);
+        background-color: var(--light-gray);
     }
 
     /* Stile di Intestazione e Titolo */
@@ -41,7 +43,7 @@ def inject_css():
     }
 
     .stButton>button:hover {
-        background-color: var(--accent-color);
+        background-color: var(--primary-color);
         color: white;
     }
 
@@ -52,7 +54,7 @@ def inject_css():
 
     /* Stile dei Link */
     a {
-        color: var(--primary-color);
+        color: var(--secondary-color);
         text-decoration: none;
     }
 
@@ -68,23 +70,25 @@ def inject_css():
         bottom: 0;
         width: 100%;
         background-color: var(--background-color);
-        color: #333;
+        color: var(--text-color);
         text-align: center;
         padding: 10px;
+        border-top: 1px solid var(--light-gray);
     }
 
     /* Etichette delle Checkbox */
     .stCheckbox label {
-        color: #333;
+        color: var(--text-color);
     }
 
     /* Bordo dei Campi di Testo e Aree di Testo */
-    .stTextInput>div>div>input {
-        border-color: var(--primary-color);
-    }
-
+    .stTextInput>div>div>input,
     .stTextArea>div>div>textarea {
-        border-color: var(--primary-color);
+        border: 1px solid var(--light-gray);
+        border-radius: 5px;
+        padding: 8px;
+        color: var(--text-color);
+        background-color: #FFFFFF;
     }
 
     /* Stile dei Pulsanti di Download */
@@ -97,29 +101,31 @@ def inject_css():
     }
 
     .stDownloadButton>button:hover {
-        background-color: var(--accent-color);
+        background-color: var(--primary-color);
         color: white;
     }
 
     /* Stile dei Messaggi della Chat */
     .user-message {
-        background-color: #F0FFF0; /* Verde Chiaro */
+        background-color: #F0F8FF; /* Alice Blue */
         padding: 10px;
         border-radius: 10px;
         margin-bottom: 10px;
         max-width: 80%;
         align-self: flex-end;
         box-shadow: 2px 2px 5px var(--box-shadow);
+        color: var(--text-color);
     }
 
     .assistant-message {
-        background-color: #FFFACD; /* Lemon Chiffon */
+        background-color: #FAFAD2; /* Light Goldenrod Yellow */
         padding: 10px;
         border-radius: 10px;
         margin-bottom: 10px;
         max-width: 80%;
         align-self: flex-start;
         box-shadow: 2px 2px 5px var(--box-shadow);
+        color: var(--text-color);
     }
 
     .chat-container {
@@ -140,33 +146,51 @@ def inject_css():
         margin-bottom: 5px;
         font-size: 14px;
         padding: 8px;
-        background-color: #FFF3E0; /* Arancione Chiaro */
+        background-color: #EBF5FB; /* Light Blue */
         border-radius: 5px;
         transition: background-color 0.3s;
+        color: var(--primary-color);
     }
 
     .suggested-questions a:hover {
-        background-color: #FFE0B2; /* Arancione Più Chiaro */
+        background-color: #D6EAF8; /* Slightly darker light blue */
+        color: var(--accent-color);
     }
 
     /* Stile dei Box */
     .box {
         background-color: var(--background-color);
-        border: 1px solid #DDD;
+        border: 1px solid var(--light-gray);
         border-radius: 10px;
         padding: 15px;
         margin-bottom: 10px;
         box-shadow: 2px 2px 10px var(--box-shadow);
+        color: var(--text-color);
     }
 
     /* Stile per le Domande Correlate */
     .related-question a {
         font-size: 16px;
-        color: var(--primary-color);
+        color: var(--secondary-color);
     }
 
     .related-question a:hover {
         color: var(--accent-color);
+    }
+
+    /* Stile delle Checkbox */
+    .stCheckbox input[type=checkbox] {
+        accent-color: var(--secondary-color);
+    }
+
+    /* Stile delle Text Area */
+    .stTextArea textarea {
+        color: var(--text-color);
+    }
+
+    /* Stile dei Titoli */
+    h1, h2, h3, h4, h5, h6 {
+        color: var(--primary-color);
     }
 
     </style>
@@ -317,15 +341,15 @@ def display_chat():
         with chat_placeholder.container():
             for sender, message in st.session_state.chat_history:
                 if sender == "user":
-                    st.chat_message("user").write(message)
+                    st.markdown(f'<div class="user-message">{message}</div>', unsafe_allow_html=True)
                 else:
-                    st.chat_message("assistant").write(message)
+                    st.markdown(f'<div class="assistant-message">{message}</div>', unsafe_allow_html=True)
 
 # Visualizza la cronologia della chat
 display_chat()
 
 # Campo di input per l'utente
-user_input = st.chat_input("Tu:")
+user_input = st.text_input("Tu:", key="user_input")
 
 if user_input:
     # Aggiungi la domanda dell'utente alla cronologia
@@ -404,7 +428,7 @@ with st.expander("📚 Fonti", expanded=False):
         <div class="box">
             <div style="display: flex; align-items: center;">
                 <img src="{icon_url}" alt="{source['file_type']} icon" style="width:24px;height:24px;margin-right:10px;">
-                <a href="{source['link']}" target="_blank" style="font-size: 18px; text-decoration: none; color: var(--primary-color);">{source['title']}</a>
+                <a href="{source['link']}" target="_blank" style="font-size: 18px; text-decoration: none; color: var(--secondary-color);">{source['title']}</a>
             </div>
             <div style="margin-left:34px; margin-top:10px;">
                 <strong>Editore:</strong> {source['publisher']}<br>
@@ -486,9 +510,10 @@ st.markdown("""
     bottom: 0;
     width: 100%;
     background-color: var(--background-color);
-    color: #333;
+    color: var(--text-color);
     text-align: center;
     padding: 10px;
+    border-top: 1px solid var(--light-gray);
 }
 </style>
 <div class="footer">
