@@ -8,7 +8,7 @@ st.set_page_config(
     layout="wide"  # Imposta il layout su wide
 )
 
-# --------------------- Iniezione CSS Personalizzato per Schema di Colori e Estetica ---------------------
+# --------------------- Iniezione CSS Personalizzato per Schema di Colori e Layout ---------------------
 def inject_css():
     st.markdown("""
     <style>
@@ -21,6 +21,12 @@ def inject_css():
         --text-color: #2C3E50; /* Dark text */
         --light-gray: #ECF0F1; /* Light gray for borders and backgrounds */
         --box-shadow: rgba(0, 0, 0, 0.1);
+    }
+
+    /* Stile generale del corpo */
+    body {
+        background-color: var(--background-color);
+        color: var(--text-color);
     }
 
     /* Stile della Barra Laterale */
@@ -108,22 +114,22 @@ def inject_css():
 
     /* Stile dei Messaggi della Chat */
     .user-message {
-        background-color: #F0F8FF; /* Alice Blue */
-        padding: 10px;
-        border-radius: 10px;
-        margin-bottom: 10px;
-        max-width: 80%;
+        background-color: #DCF8C6; /* Light Green */
+        padding: 10px 15px;
+        border-radius: 20px;
+        margin: 10px;
+        max-width: 70%;
         align-self: flex-end;
         box-shadow: 2px 2px 5px var(--box-shadow);
         color: var(--text-color);
     }
 
     .assistant-message {
-        background-color: #FAFAD2; /* Light Goldenrod Yellow */
-        padding: 10px;
-        border-radius: 10px;
-        margin-bottom: 10px;
-        max-width: 80%;
+        background-color: #FFFFFF; /* White */
+        padding: 10px 15px;
+        border-radius: 20px;
+        margin: 10px;
+        max-width: 70%;
         align-self: flex-start;
         box-shadow: 2px 2px 5px var(--box-shadow);
         color: var(--text-color);
@@ -132,13 +138,19 @@ def inject_css():
     .chat-container {
         display: flex;
         flex-direction: column;
+        height: calc(100vh - 150px); /* Adjust height based on input bar and footer */
+        overflow-y: auto;
+        padding: 20px;
     }
 
     /* Scrollbar per la Cronologia delle Chat */
-    .sidebar-chat-history {
-        max-height: 300px;
-        overflow-y: auto;
-        padding-right: 10px;
+    .chat-container::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .chat-container::-webkit-scrollbar-thumb {
+        background-color: var(--secondary-color);
+        border-radius: 4px;
     }
 
     /* Stile per le Domande Suggerite */
@@ -192,6 +204,17 @@ def inject_css():
     /* Stile dei Titoli */
     h1, h2, h3, h4, h5, h6 {
         color: var(--primary-color);
+    }
+
+    /* Stile dell'Input Bar Fisso */
+    .input-bar {
+        position: fixed;
+        bottom: 40px; /* Adjust based on footer height */
+        left: 0;
+        width: 100%;
+        background-color: var(--background-color);
+        padding: 10px 20px;
+        box-shadow: 0 -2px 5px var(--box-shadow);
     }
 
     </style>
@@ -323,7 +346,7 @@ st.write("")
 
 # --------------------- Sezione Chatbot ---------------------
 # Placeholder per i messaggi della chat
-chat_placeholder = st.empty()
+chat_placeholder = st.container()
 
 # Funzione per generare la risposta dell'assistente
 def generate_response(user_input):
@@ -336,20 +359,20 @@ def generate_response(user_input):
     response_text = """
 **Ecco la granularità delle tabelle relative al bilancio:**
 
-| Tabella                | Granularità                                    |
-|------------------------|------------------------------------------------|
-| FIN_DATA_Q1_REVENUE    | Dipartimento e mese                            |
-| FIN_DATA_Q2_EXPENSES   | Dipartimento, categoria di spesa e trimestre    |
-| FIN_DATA_Q3_PROFIT     | Dipartimento, prodotto e anno                  |
-| FIN_DATA_Q4_ASSETS     | Categoria di asset e mese                      |
-| FIN_DATA_Q5_LIABILITIES | Tipo di passività e anno                      |
+| Tabella                 | Granularità                                     |
+|-------------------------|-------------------------------------------------|
+| FIN_DATA_Q1_REVENUE     | Dipartimento e mese                             |
+| FIN_DATA_Q2_EXPENSES    | Dipartimento, categoria di spesa e trimestre     |
+| FIN_DATA_Q3_PROFIT      | Dipartimento, prodotto e anno                   |
+| FIN_DATA_Q4_ASSETS      | Categoria di asset e mese                       |
+| FIN_DATA_Q5_LIABILITIES | Tipo di passività e anno                        |
     """
     return response_text
 
 # Funzione per visualizzare la cronologia della chat utilizzando st.markdown
 def display_chat():
     if st.session_state.chat_history:
-        with chat_placeholder.container():
+        with chat_placeholder:
             for sender, message in st.session_state.chat_history:
                 if sender == "user":
                     st.markdown(f'<div class="user-message">{message}</div>', unsafe_allow_html=True)
@@ -359,19 +382,54 @@ def display_chat():
 # Visualizza la cronologia della chat
 display_chat()
 
-# Campo di input per l'utente
-user_input = st.text_input("Tu:", key="user_input")
+# --------------------- Sezione Input Fissa ---------------------
+# Utilizza HTML per posizionare l'input bar fissata al fondo
+st.markdown("""
+<div class="input-bar">
+    <form action="" method="POST">
+        <input type="text" id="user_input" name="user_input" placeholder="Scrivi un messaggio..." style="width: 80%; padding: 10px; border-radius: 5px; border: 1px solid var(--light-gray);">
+        <button type="submit" style="background-color: var(--secondary-color); color: white; border: none; border-radius: 5px; padding: 10px 20px; margin-left: 10px;">Invia</button>
+    </form>
+</div>
+""", unsafe_allow_html=True)
 
-if user_input:
-    # Aggiungi la domanda dell'utente alla cronologia
-    st.session_state.chat_history.append(("user", user_input))
+# JavaScript per inviare il testo dall'input al server senza ricaricare la pagina
+st.markdown("""
+<script>
+const form = document.querySelector('form');
+form.onsubmit = (e) => {
+    e.preventDefault();
+    const input = document.getElementById('user_input');
+    const user_input = input.value;
+    if (user_input.trim() !== "") {
+        // Invio tramite Streamlit Query Params
+        const url = new URL(window.location);
+        url.searchParams.set('user_input', user_input);
+        window.location = url;
+    }
+};
+</script>
+""", unsafe_allow_html=True)
 
-    # Genera la risposta dell'assistente
-    assistant_response = generate_response(user_input)
-    st.session_state.chat_history.append(("assistant", assistant_response))
+# Recupera l'input dall'URL se presente
+import urllib.parse
 
-    # Aggiorna la visualizzazione della chat
-    display_chat()
+query_params = st.experimental_get_query_params()
+if 'user_input' in query_params:
+    user_input = query_params['user_input'][0]
+    if user_input:
+        # Aggiungi la domanda dell'utente alla cronologia
+        st.session_state.chat_history.append(("user", user_input))
+
+        # Genera la risposta dell'assistente
+        assistant_response = generate_response(user_input)
+        st.session_state.chat_history.append(("assistant", assistant_response))
+
+        # Aggiorna la visualizzazione della chat
+        display_chat()
+
+        # Resetta i parametri nell'URL per evitare reinserimenti
+        st.experimental_set_query_params()
 
 # --------------------- Sezione Fonti con Icone Realistiche e Solo File Excel e PPT ---------------------
 with st.expander("📚 Fonti", expanded=False):
@@ -514,19 +572,6 @@ for question in related_questions:
 
 # --------------------- Sezione Footer ---------------------
 st.markdown("""
-<style>
-.footer {
-    position: fixed;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    background-color: var(--background-color);
-    color: var(--text-color);
-    text-align: center;
-    padding: 10px;
-    border-top: 1px solid var(--light-gray);
-}
-</style>
 <div class="footer">
     <p>© 2024 Cassa Depositi e Prestiti (CDP). Tutti i diritti riservati.</p> 
 </div>
