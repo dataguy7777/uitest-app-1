@@ -257,12 +257,12 @@ def generate_suggested_questions(latest_question):
 with st.sidebar:
     # Aggiungi il logo di Cassa Depositi e Prestiti (CDP)
     logo_url = "https://www.kindpng.com/picc/m/612-6127858_cassa-depositi-e-prestiti-logo-hd-png-download.png"  # URL aggiornato del logo
-    st.image(logo_url, use_column_width=True)
-    
+    st.image(logo_url, use_container_width=True)  # Updated parameter
+
     st.title("Data Agent")
     st.markdown("**Applicazione di Chatbot con Funzionalità Avanzate**")
     st.markdown("---")
-    
+
     # Sezione: Cronologia Domande
     st.markdown("### 📜 Cronologia Domande")
     if st.session_state.chat_history:
@@ -279,9 +279,9 @@ with st.sidebar:
             history_container.markdown('</div>', unsafe_allow_html=True)
     else:
         st.markdown("Nessuna domanda precedente.")
-    
+
     st.markdown("---")
-    
+
     # Sezione: Domande Suggerite
     st.markdown("### 💡 Domande Suggerite")
     if st.session_state.chat_history:
@@ -293,7 +293,7 @@ with st.sidebar:
             "Come implementare efficacemente il data lineage nelle tabelle finanziarie?",
             "Quali strumenti sono disponibili per monitorare il data lineage in un istituto finanziario?"
         ]
-    
+
     with st.container():
         for question in suggested_questions:
             st.markdown(f"""
@@ -301,9 +301,9 @@ with st.sidebar:
                 <a href="#">{question}</a>
             </div>
             """, unsafe_allow_html=True)
-    
+
     st.markdown("---")
-    
+
     # Bottoni Esistenti
     st.markdown("🔍 **Esplora**")
     st.button("Fonti")
@@ -335,7 +335,7 @@ Ecco la granularità delle tabelle relative al bilancio:
     """
     return response
 
-# Funzione per visualizzare la cronologia della chat utilizzando st.chat_message
+# Funzione per visualizzare la cronologia della chat utilizzando st.markdown
 def display_chat():
     if st.session_state.chat_history:
         with chat_placeholder.container():
@@ -349,7 +349,7 @@ def display_chat():
 display_chat()
 
 # Campo di input per l'utente
-user_input = st.text_input("Tu:", key="user_input")
+user_input = st.text_input("Tu:", key="user_input")  # Changed from st.chat_input to st.text_input
 
 if user_input:
     # Aggiungi la domanda dell'utente alla cronologia
@@ -365,7 +365,7 @@ if user_input:
 # --------------------- Sezione Fonti con Icone Realistiche e Solo File Excel e PPT ---------------------
 with st.expander("📚 Fonti", expanded=False):
     st.markdown("Questi sono i file Excel e PowerPoint che forniscono informazioni dettagliate relative al data lineage delle tabelle finanziarie. Espandi per visualizzare le fonti:")
-    
+
     # Lista dei file forniti
     all_files = [
         "Financial_Report_Q1_2024.xlsx",
@@ -380,13 +380,13 @@ with st.expander("📚 Fonti", expanded=False):
         "Risk_Assessment_2024.xlsx",
         "miscellaneous_notes.txt"
     ]
-    
+
     # Seleziona solo un file Excel e uno PowerPoint
     selected_files = {
         "excel": "Financial_Report_Q1_2024.xlsx",
         "pptx": "Budget_Presentation_Q2_2024.pptx"
     }
-    
+
     # Funzione per simulare il recupero delle fonti selezionate
     def get_selected_sources():
         sources = []
@@ -413,13 +413,13 @@ with st.expander("📚 Fonti", expanded=False):
         return sources
 
     sources = get_selected_sources()
-    
+
     # Mappatura dei tipi di file alle icone realistiche
     file_icons = {
         "excel": "https://img.icons8.com/color/48/000000/microsoft-excel-2019--v1.png",
         "pptx": "https://img.icons8.com/color/48/000000/microsoft-powerpoint-2019--v1.png"
     }
-    
+
     # Visualizza ogni fonte selezionata con l'icona appropriata e link mock
     for source in sources:
         icon_url = file_icons.get(source["file_type"], "https://img.icons8.com/ios-filled/50/000000/file.png")  # Icona di default se il tipo di file non è trovato
