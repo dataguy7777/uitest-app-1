@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 
 # --------------------- Configurazione della Pagina ---------------------
 st.set_page_config(
@@ -211,8 +212,15 @@ if 'chat_history' not in st.session_state:
     st.session_state['chat_history'] = [
         ("user", "Puoi fornirmi la granularità delle tabelle per il bilancio?"),
         ("assistant", """
-Ecco la granularità delle tabelle relative al bilancio:
-• **FIN_DATA_Q1_REVENUE:** Granularità per dipartimento e mese.
+**Ecco la granularità delle tabelle relative al bilancio:**
+
+| Tabella               | Granularità                                  |
+|-----------------------|----------------------------------------------|
+| FIN_DATA_Q1_REVENUE   | Dipartimento e mese                          |
+| FIN_DATA_Q2_EXPENSES  | Dipartimento, categoria di spesa e trimestre  |
+| FIN_DATA_Q3_PROFIT    | Dipartimento, prodotto e anno                |
+| FIN_DATA_Q4_ASSETS    | Categoria di asset e mese                    |
+| FIN_DATA_Q5_LIABILITIES | Tipo di passività e anno                  |
         """)
     ]
 
@@ -324,18 +332,41 @@ def generate_response(user_input):
     In un'applicazione reale, questa funzione potrebbe integrare un modello NLP o altre logiche di business.
     Per questo esempio, una risposta predefinita focalizzata sulla granularità delle tabelle è usata.
     """
-    # Risposta focalizzata sulla granularità delle tabelle
-    response = """
-Ecco la granularità delle tabelle relative al bilancio:
-• **FIN_DATA_Q1_REVENUE:** Granularità per dipartimento e mese.
-• **FIN_DATA_Q2_EXPENSES:** Granularità per dipartimento, categoria di spesa e trimestre.
-• **FIN_DATA_Q3_PROFIT:** Granularità per dipartimento, prodotto e anno.
-• **FIN_DATA_Q4_ASSETS:** Granularità per categoria di asset e mese.
-• **FIN_DATA_Q5_LIABILITIES:** Granularità per tipo di passività e anno.
-    """
-    return response
+    # Risposta focalizzata sulla granularità delle tabelle con embedded dataframe
+    response_text = """
+**Ecco la granularità delle tabelle relative al bilancio:**
 
-# Funzione per visualizzare la cronologia della chat utilizzando st.markdown
+| Tabella               | Granularità                                  |
+|-----------------------|----------------------------------------------|
+| FIN_DATA_Q1_REVENUE   | Dipartimento e mese                          |
+| FIN_DATA_Q2_EXPENSES  | Dipartimento, categoria di spesa e trimestre  |
+| FIN_DATA_Q3_PROFIT    | Dipartimento, prodotto e anno                |
+| FIN_DATA_Q4_ASSETS    | Categoria di asset e mese                    |
+| FIN_DATA_Q5_LIABILITIES | Tipo di passività e anno                  |
+    """
+
+    # Creazione del dataframe per visualizzazione
+    data = {
+        "Tabella": [
+            "FIN_DATA_Q1_REVENUE",
+            "FIN_DATA_Q2_EXPENSES",
+            "FIN_DATA_Q3_PROFIT",
+            "FIN_DATA_Q4_ASSETS",
+            "FIN_DATA_Q5_LIABILITIES"
+        ],
+        "Granularità": [
+            "Dipartimento e mese",
+            "Dipartimento, categoria di spesa e trimestre",
+            "Dipartimento, prodotto e anno",
+            "Categoria di asset e mese",
+            "Tipo di passività e anno"
+        ]
+    }
+    df = pd.DataFrame(data)
+
+    return response_text, df
+
+# Funzione per visualizzare la cronologia della chat utilizzando st.markdown e st.dataframe
 def display_chat():
     if st.session_state.chat_history:
         with chat_placeholder.container():
@@ -343,13 +374,19 @@ def display_chat():
                 if sender == "user":
                     st.markdown(f'<div class="user-message">{message}</div>', unsafe_allow_html=True)
                 else:
-                    st.markdown(f'<div class="assistant-message">{message}</div>', unsafe_allow_html=True)
+                    # Verifica se il messaggio è una tuple con testo e dataframe
+                    if isinstance(message, tuple) and len(message) == 2:
+                        text, df = message
+                        st.markdown(f'<div class="assistant-message">{text}</div>', unsafe_allow_html=True)
+                        st.dataframe(df)
+                    else:
+                        st.markdown(f'<div class="assistant-message">{message}</div>', unsafe_allow_html=True)
 
 # Visualizza la cronologia della chat
 display_chat()
 
 # Campo di input per l'utente
-user_input = st.text_input("Tu:", key="user_input")  # Changed from st.chat_input to st.text_input
+user_input = st.text_input("Tu:", key="user_input")
 
 if user_input:
     # Aggiungi la domanda dell'utente alla cronologia
