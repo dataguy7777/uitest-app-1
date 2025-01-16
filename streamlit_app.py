@@ -165,7 +165,7 @@ def inject_css():
     .chat-container {
         display: flex;
         flex-direction: column;
-        height: calc(100vh - 150px); /* Adjust height based on input bar and footer */
+        height: calc(100vh - 200px); /* Adjust height based on input bar and footer */
         overflow-y: auto;
         padding: 20px;
     }
@@ -236,7 +236,7 @@ def inject_css():
     /* Stile dell'Input Bar Fisso */
     .input-bar {
         position: fixed;
-        bottom: 0;
+        bottom: 50px; /* Adjust based on footer height */
         left: 0;
         width: 100%;
         background-color: var(--background-color);
@@ -269,6 +269,11 @@ def inject_css():
     .input-bar button:hover {
         background-color: var(--primary-color);
     }
+
+    /* Padding for main content to avoid overlap with input bar */
+    .main-content {
+        padding-bottom: 100px; /* Height of input bar + some space */
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -287,15 +292,15 @@ if 'chat_history' not in st.session_state:
     st.session_state['chat_history'] = [
         ("user", "Puoi fornirmi la granularità delle tabelle per il bilancio?"),
         ("assistant", """
-    **Ecco la granularità delle tabelle relative al bilancio:**
-    
-    | Tabella                 | Granularità                                     |
-    |-------------------------|-------------------------------------------------|
-    | FIN_DATA_Q1_REVENUE     | Dipartimento e mese                             |
-    | FIN_DATA_Q2_EXPENSES    | Dipartimento, categoria di spesa e trimestre    |
-    | FIN_DATA_Q3_PROFIT      | Dipartimento, prodotto e anno                   |
-    | FIN_DATA_Q4_ASSETS      | Categoria di asset e mese                       |
-    | FIN_DATA_Q5_LIABILITIES | Tipo di passività e anno                        |
+**Ecco la granularità delle tabelle relative al bilancio:**
+
+| Tabella                 | Granularità                                     |
+|-------------------------|-------------------------------------------------|
+| FIN_DATA_Q1_REVENUE     | Dipartimento e mese                             |
+| FIN_DATA_Q2_EXPENSES    | Dipartimento, categoria di spesa e trimestre    |
+| FIN_DATA_Q3_PROFIT      | Dipartimento, prodotto e anno                   |
+| FIN_DATA_Q4_ASSETS      | Categoria di asset e mese                       |
+| FIN_DATA_Q5_LIABILITIES | Tipo di passività e anno                        |
         """)
     ]
 
@@ -393,8 +398,10 @@ with st.sidebar:
     st.button("Domande Correlate")
 
 # --------------------- Contenuto Principale ---------------------
+st.markdown('<div class="main-content">', unsafe_allow_html=True)
 st.title("💬 Data Agent")
 st.write("")
+st.markdown('</div>', unsafe_allow_html=True)
 
 # --------------------- Sezione Chatbot ---------------------
 # Placeholder per i messaggi della chat
@@ -447,7 +454,7 @@ display_chat()
 # --------------------- Sezione Input Fissa ---------------------
 # Utilizza un form per l'input dell'utente
 with st.form(key='input_form', clear_on_submit=True):
-    user_input = st.text_input("Tu:", placeholder="Scrivi un messaggio...", key='user_input')
+    user_input = st.text_input("", placeholder="Scrivi un messaggio...", key='user_input')
     submit_button = st.form_submit_button(label='Invia')
 
 if submit_button and user_input.strip() != "":
