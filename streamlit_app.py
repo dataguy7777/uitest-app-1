@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import urllib.parse
 
 # --------------------- Configurazione della Pagina ---------------------
 st.set_page_config(
@@ -114,26 +113,53 @@ def inject_css():
     }
 
     /* Stile dei Messaggi della Chat */
+    .user-message, .assistant-message {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
     .user-message {
-        background-color: #DCF8C6; /* Light Green */
-        padding: 10px 15px;
-        border-radius: 20px;
-        margin: 10px;
-        max-width: 70%;
-        align-self: flex-end;
-        box-shadow: 2px 2px 5px var(--box-shadow);
-        color: var(--text-color);
+        justify-content: flex-end;
     }
 
     .assistant-message {
-        background-color: #FFFFFF; /* White */
+        justify-content: flex-start;
+    }
+
+    .user-message .message-content, .assistant-message .message-content {
         padding: 10px 15px;
         border-radius: 20px;
-        margin: 10px;
         max-width: 70%;
-        align-self: flex-start;
         box-shadow: 2px 2px 5px var(--box-shadow);
+    }
+
+    .user-message .message-content {
+        background-color: #DCF8C6; /* Light Green */
         color: var(--text-color);
+        margin-left: 10px;
+    }
+
+    .assistant-message .message-content {
+        background-color: #FFFFFF; /* White */
+        color: var(--text-color);
+        margin-right: 10px;
+    }
+
+    .user-message img, .assistant-message img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+    }
+
+    /* Icona del Bot */
+    .assistant-message img {
+        margin-right: 10px;
+    }
+
+    /* Icona dell'Utente */
+    .user-message img {
+        margin-left: 10px;
     }
 
     .chat-container {
@@ -210,7 +236,7 @@ def inject_css():
     /* Stile dell'Input Bar Fisso */
     .input-bar {
         position: fixed;
-        bottom: 40px; /* Adjust based on footer height */
+        bottom: 0;
         left: 0;
         width: 100%;
         background-color: var(--background-color);
@@ -218,15 +244,15 @@ def inject_css():
         box-shadow: 0 -2px 5px var(--box-shadow);
         display: flex;
         align-items: center;
-        justify-content: center;
     }
 
     .input-bar input[type="text"] {
-        width: 80%;
+        flex: 1;
         padding: 10px;
         border: 1px solid var(--light-gray);
         border-radius: 5px;
         margin-right: 10px;
+        font-size: 16px;
     }
 
     .input-bar button {
@@ -236,6 +262,7 @@ def inject_css():
         border-radius: 5px;
         padding: 10px 20px;
         cursor: pointer;
+        font-size: 16px;
         transition: background-color 0.3s;
     }
 
@@ -260,15 +287,15 @@ if 'chat_history' not in st.session_state:
     st.session_state['chat_history'] = [
         ("user", "Puoi fornirmi la granularità delle tabelle per il bilancio?"),
         ("assistant", """
-**Ecco la granularità delle tabelle relative al bilancio:**
-
-| Tabella                 | Granularità                                     |
-|-------------------------|-------------------------------------------------|
-| FIN_DATA_Q1_REVENUE     | Dipartimento e mese                             |
-| FIN_DATA_Q2_EXPENSES    | Dipartimento, categoria di spesa e trimestre    |
-| FIN_DATA_Q3_PROFIT      | Dipartimento, prodotto e anno                   |
-| FIN_DATA_Q4_ASSETS      | Categoria di asset e mese                       |
-| FIN_DATA_Q5_LIABILITIES | Tipo di passività e anno                        |
+    **Ecco la granularità delle tabelle relative al bilancio:**
+    
+    | Tabella                 | Granularità                                     |
+    |-------------------------|-------------------------------------------------|
+    | FIN_DATA_Q1_REVENUE     | Dipartimento e mese                             |
+    | FIN_DATA_Q2_EXPENSES    | Dipartimento, categoria di spesa e trimestre    |
+    | FIN_DATA_Q3_PROFIT      | Dipartimento, prodotto e anno                   |
+    | FIN_DATA_Q4_ASSETS      | Categoria di asset e mese                       |
+    | FIN_DATA_Q5_LIABILITIES | Tipo di passività e anno                        |
         """)
     ]
 
@@ -400,52 +427,39 @@ def display_chat():
         with chat_placeholder:
             for sender, message in st.session_state.chat_history:
                 if sender == "user":
-                    st.markdown(f'<div class="user-message">{message}</div>', unsafe_allow_html=True)
+                    st.markdown(f"""
+                    <div class="user-message">
+                        <img src="https://img.icons8.com/color/48/000000/user.png" alt="User Icon">
+                        <div class="message-content">{message}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
                 else:
-                    st.markdown(f'<div class="assistant-message">{message}</div>', unsafe_allow_html=True)
+                    st.markdown(f"""
+                    <div class="assistant-message">
+                        <img src="https://www.kindpng.com/picc/m/612-6127858_cassa-depositi-e-prestiti-logo-hd-png-download.png" alt="CDP Icon">
+                        <div class="message-content">{message}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
 # Visualizza la cronologia della chat
 display_chat()
 
 # --------------------- Sezione Input Fissa ---------------------
-# Utilizza HTML per posizionare l'input bar fissata al fondo
-st.markdown("""
-<div class="input-bar">
-    <input type="text" id="user_input" name="user_input" placeholder="Scrivi un messaggio...">
-    <button onclick="sendMessage()">Invia</button>
-</div>
+# Utilizza un form per l'input dell'utente
+with st.form(key='input_form', clear_on_submit=True):
+    user_input = st.text_input("Tu:", placeholder="Scrivi un messaggio...", key='user_input')
+    submit_button = st.form_submit_button(label='Invia')
 
-<script>
-function sendMessage() {
-    const input = document.getElementById('user_input');
-    const user_input = input.value;
-    if (user_input.trim() !== "") {
-        // Invio tramite Streamlit Query Params
-        const url = new URL(window.location);
-        url.searchParams.set('user_input', user_input);
-        window.location = url;
-    }
-}
-</script>
-""", unsafe_allow_html=True)
-
-# Recupera l'input dall'URL se presente
-query_params = st.query_params
-if 'user_input' in query_params:
-    user_input = query_params['user_input'][0]
-    if user_input:
-        # Aggiungi la domanda dell'utente alla cronologia
-        st.session_state.chat_history.append(("user", user_input))
-
-        # Genera la risposta dell'assistente
-        assistant_response = generate_response(user_input)
-        st.session_state.chat_history.append(("assistant", assistant_response))
-
-        # Aggiorna la visualizzazione della chat
-        display_chat()
-
-        # Resetta i parametri nell'URL per evitare reinserimenti
-        st.experimental_set_query_params()
+if submit_button and user_input.strip() != "":
+    # Aggiungi la domanda dell'utente alla cronologia
+    st.session_state.chat_history.append(("user", user_input))
+    
+    # Genera la risposta dell'assistente
+    assistant_response = generate_response(user_input)
+    st.session_state.chat_history.append(("assistant", assistant_response))
+    
+    # Aggiorna la visualizzazione della chat
+    display_chat()
 
 # --------------------- Sezione Fonti con Icone Realistiche e Solo File Excel e PPT ---------------------
 with st.expander("📚 Fonti", expanded=False):
